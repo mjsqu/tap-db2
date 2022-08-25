@@ -69,5 +69,8 @@ def get_db2_sql_engine(config) -> Engine:
         config["port"],
         config["database"],
     )
-    engine = create_engine(connection_string)
+    if 'isolation_level' in config:
+        engine = create_engine(connection_string,isolation_level=config["isolation_level"])
+    else:
+        engine = create_engine(connection_string)
     return engine
