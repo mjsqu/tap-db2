@@ -791,6 +791,10 @@ def do_sync(db2_conn, config, catalog, state):
 
 def log_server_params(db2_conn):
     with db2_conn.connect() as open_conn:
+        try:
+            LOGGER.info(f"ISOLATION LEVEL: {open_conn.get_isolation_level()}")
+        except NotImplementedError:
+            pass
         #
         # https://stackoverflow.com/questions/3821795/how-to-check-db2-version
         # two approaches possible - TABLE(sysproc.env_get_inst_info())
