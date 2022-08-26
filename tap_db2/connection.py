@@ -84,6 +84,5 @@ def get_db2_sql_engine(config) -> Engine:
             connection_parameters,
         )
 
-    connection_string = "{}://
     engine = create_engine(connection_string)
     return engine
