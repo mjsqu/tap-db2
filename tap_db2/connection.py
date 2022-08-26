@@ -60,14 +60,30 @@ def revert_ouput_converter(conn, prev_converter):
 def get_db2_sql_engine(config) -> Engine:
     """Using parameters from the config to connect to DB2 using ibm_db_sa+pyodbc"""
 
-    # connection_string = "ibm_db_sa+pyodbc://db2inst1:*
-    # @localhost:50000/TESTDB"
-    connection_string = "ibm_db_sa+pyodbc://{}:{}@{}:{}/{}".format(
+    connection_parameters = "{}:{}@{}:{}/{}".format(
         config["username"],
         config["password"],
         config["hostname"],
         config["port"],
         config["database"],
     )
+
+    if 'isolation_level' in config:
+        # Switch to the db2+ibm_db connection string and append TxnIsolation=
+        protocol = "db2+ibm_db"
+        txnisolation = config['isolation_level']
+        connection_string = "{}://{};TxnIsolation={}".format(
+            protocol,
+            connection_parameters,
+            txnisolation,
+        )
+    else:
+        protocol = "ibm_db_sa+pyodbc"
+        connection_string = "{}://{}".format(
+            protocol,
+            connection_parameters,
+        )
+
+    connection_string = "{}://
     engine = create_engine(connection_string)
     return engine
