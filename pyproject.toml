@@ -1,0 +1,22 @@
+[project]
+name = "tap-db2"
+dependencies = [
+        "attrs==22.2.0",
+        "ibm-db-sa==0.3.8",
+        "ibm-db==3.1.4",
+        "jinja2==3.1.2",
+        "markupsafe<2.2.0",
+        "pendulum==2.1.2",
+        "pyodbc==4.0.35",
+        "pytz>=2018.1",
+        "singer-python>=5.12.0",
+        "sqlalchemy<2.0.0",
+]
+dynamic = [
+   "version"
+]
+
+[build-system]
+requires = ["setuptools", "wheel", "setuptools_scm[toml]>=6.2"]
+
+[tool.setuptools_scm]
