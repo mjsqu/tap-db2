@@ -23,7 +23,7 @@ setup(
         "pyodbc==4.0.35",
         "pytz>=2018.1",
         "singer-python>=5.12.0",
-        "sqlalchemy<2.0.0",
+        "sqlalchemy<3.0.0",
     ],
     entry_points="""
           [console_scripts]
