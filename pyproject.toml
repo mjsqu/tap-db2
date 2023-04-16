@@ -19,4 +19,7 @@ dynamic = [
 [build-system]
 requires = ["setuptools", "wheel", "setuptools_scm[toml]>=6.2"]
 
+[project.scripts]
+tap-db2 = "tap_db2:main"
+
 [tool.setuptools_scm]
