@@ -24,7 +24,6 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-    - name: DB2
     - name: List files
       run: |
         ls -ltr
