@@ -11,6 +11,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    container: icr.io/db2_community/db2
     strategy:
       fail-fast: false
       matrix:
@@ -23,6 +24,7 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
+    - name: DB2
     - name: List files
       run: |
         ls -ltr
