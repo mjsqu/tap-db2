@@ -12,19 +12,9 @@ jobs:
 
     runs-on: ubuntu-latest
     container: icr.io/db2_community/db2
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.7"]
 
     steps:
-    - name: Check out the repository
-      uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
     - name: List files and check db2 version
       run: |
-        ls -ltr
-        db2 --version
+        find /var/db2_setup
+        
