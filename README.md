@@ -1,24 +1,18 @@
-# TO-DO
+# tap-db2
 
-# pipelinewise-tap-mssql
+[Singer](https://www.singer.io/) tap that extracts data from a [DB2](https://www.ibm.com/db2) database and produces JSON-formatted data following the [Singer spec](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md). **N.B. This has only been tested against a DB2 LUW instance v10.5**
 
-[Singer](https://www.singer.io/) tap that extracts data from a [mssql](https://www.mssql.com/) database and produces JSON-formatted data following the [Singer spec](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md).
-
-This is a fork from a [PipelineWise](https://transferwise.github.io/pipelinewise) compatible tap connector to add a log_based replication method for use with [Change Tracking](https://docs.microsoft.com/en-us/sql/relational-databases/track-changes/about-change-tracking-sql-server).
+This is adapted from a fork of an MSSQL [PipelineWise](https://transferwise.github.io/pipelinewise) compatible tap connector to add a log_based replication method for use with [Change Tracking](https://docs.microsoft.com/en-us/sql/relational-databases/track-changes/about-change-tracking-sql-server).
 
 ## How to use it
 
-The recommended method of running this tap is to use it from [PipelineWise](https://transferwise.github.io/pipelinewise). When running it from PipelineWise you don't need to configure this tap with JSON files and most of things are automated. Please check the related documentation at [Tap mssql](https://transferwise.github.io/pipelinewise/connectors/taps/mssql.html)
-
-This tap has also been tested with [Meltano](https://meltano.com) and can be configured as part of their ELT for the DataOps era.
+This tap has been tested with [Meltano](https://meltano.com) and can be configured as part of their ELT for the DataOps era.
 
 If you want to run this [Singer Tap](https://singer.io) independently please read further.
 
 ## Usage
 
-This section dives into basic usage of `tap-mssql` by walking through extracting
-data from a table. It assumes that you can connect to and read from a mssql
-database.
+This section dives into basic usage of `tap-db2` by walking through extracting data from a table. It assumes that you can connect to and read from a DB2 database.
 
 ### Install
 
@@ -30,7 +24,7 @@ It's recommended to use a virtualenv:
 
 ```bash
   python3 -m venv venv
-  pip install pipelinewise-tap-mssql
+  pip install tap-db2
 ```
 
 or
@@ -44,11 +38,11 @@ or
 
 ### Have a source database
 
-There's some important business data siloed in this mssql database -- we need to
+There's some important business data siloed in this db2 database -- we need to
 extract it. Here's the table we'd like to sync:
 
 ```
-mssql> select * from example_db.animals;
+> select * from example_db.animals;
 +----|----------|----------------------+
 | id | name     | likes_getting_petted |
 +----|----------|----------------------+
@@ -73,8 +67,55 @@ Create a config file containing the database connection credentials, e.g.:
 }
 ```
 
-These are the same basic configuration properties used by the mssql command-line
-client (`mssql`).
+Optional:
+
+To emit all numeric values as strings and treat floats as string data types for the target, set use_singer_decimal to true. The resulting SCHEMA message will contain an attribute in additionalProperties containing the scale and precision of the discovered property:
+
+#### SCHEMA message
+```json
+"property": {
+            "inclusion": "available",
+            "format": "singer.decimal",
+            "type": [
+              "null",
+              "number"
+            ],
+            "additionalProperties": {
+              "scale_precision": "(12,0)"
+            }
+```
+
+Usage:
+```json
+{
+  "use_singer_decimal": true
+}
+```
+
+Optional:
+
+To avoid problems with uncommitted changes being read, you can set `offset_value` to add to the value found in the STATE for INCREMENTAL loads. If the value provided is for a datetime replication key then the `offset_value` is read as seconds to offset by, otherwise the value is used as provided.
+
+Using offset_value would result in an overlapping set of records being read each time the tap is run.
+
+Usage (offsetting by -ve 3 hours):
+```json
+{
+  "offset_value": -10800
+}
+```
+
+Optional:
+
+To make use of fetchmany(x) instead of fetchone(), use cursor_array_size with an integer value inidicating the number of rows to pull. This can help in some architectures by pulling more rows into memory. The default if omitted is 1, the tap will still use fetchmany, but with an argument of 1, under the assumption that fetchmany(1) === fetchone().
+
+Usage:
+```json
+{
+  "cursor_array_size": 10000
+}
+```
+
 
 ### Discovery mode
 
@@ -82,7 +123,7 @@ The tap can be invoked in discovery mode to find the available tables and
 columns in the database:
 
 ```bash
-$ tap-mssql --config config.json --discover
+$ tap-db2 --config config.json --discover
 
 ```
 
@@ -177,7 +218,7 @@ source table directly corresponds to a Singer stream.
 
 ### Field selection
 
-In sync mode, `tap-mssql` consumes the catalog and looks for tables and fields
+In sync mode, `tap-db2` consumes the catalog and looks for tables and fields
 have been marked as _selected_ in their associated metadata entries.
 
 Redirect output from the tap's discovery mode to a file so that it can be
@@ -250,7 +291,7 @@ information, see [Replication methods and state file](#replication-methods-and-s
 With a properties catalog that describes field and table selections, the tap can be invoked in sync mode:
 
 ```bash
-$ tap-mssql -c config.json --properties properties.json
+$ tap-db2 -c config.json --properties properties.json
 ```
 
 Messages are written to standard output following the Singer specification. The
@@ -278,7 +319,7 @@ resultant stream of JSON data can be consumed by a Singer target.
 
 ## Replication methods and state file
 
-In the above example, we invoked `tap-mssql` without providing a _state_ file
+In the above example, we invoked `tap-db2` without providing a _state_ file
 and without specifying a replication method. The three ways to replicate a given
 table are `FULL_TABLE`, `INCREMENTAL`, and `LOG_BASED`.
 
@@ -338,7 +379,7 @@ We have no meaningful state so far, so just invoke the tap in sync mode again
 without a state file:
 
 ```bash
-$ tap-mssql -c config.json --properties properties.json
+$ tap-db2 -c config.json --properties properties.json
 ```
 
 The output messages look very similar to when the table was replicated using the
@@ -388,7 +429,7 @@ data. For this example, let's manually write a `state.json` file using the
 Let's add some more animals to our farm:
 
 ```
-mssql> insert into animals (name, likes_getting_petted) values ('dog', true), ('elephant', true), ('frog', false);
+> insert into animals (name, likes_getting_petted) values ('dog', true), ('elephant', true), ('frog', false);
 ```
 
 ```bash

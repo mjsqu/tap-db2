@@ -11,9 +11,7 @@ import singer
 # import ssl
 
 # from urllib.parse import quote_plus
-
 LOGGER = singer.get_logger()
-
 
 @backoff.on_exception(backoff.expo, pyodbc.Error, max_tries=5, factor=2)
 def connect_with_backoff(connection):
@@ -70,4 +68,13 @@ def get_db2_sql_engine(config) -> Engine:
         config["database"],
     )
     engine = create_engine(connection_string)
+
     return engine
+
+def ResultIterator(cursor, arraysize=1):
+    while True:
+        results = cursor.fetchmany(arraysize)
+        if not results:
+            break
+        for result in results:
+            yield result

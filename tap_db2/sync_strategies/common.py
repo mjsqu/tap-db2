@@ -10,9 +10,11 @@ import uuid
 import singer.metrics as metrics
 from singer import metadata
 from singer import utils
+from tap_db2.connection import ResultIterator
+
+ARRAYSIZE = 1
 
 LOGGER = singer.get_logger()
-
 
 def escape(string):
     if "`" in string:
@@ -159,7 +161,10 @@ def row_to_singer_record(
             row_to_persist += (str(elem),)
         
         elif property_format == 'singer.decimal':
-            row_to_persist += (str(elem),)
+            if elem is None:
+                row_to_persist += (elem,)
+            else:
+                row_to_persist += (str(elem),)
             
         else:
             row_to_persist += (elem,)
@@ -207,16 +212,17 @@ def sync_query(
     else:
         LOGGER.info(params["replication_key_value"])
         results = cursor.execute(select_sql, params["replication_key_value"])
-    row = results.fetchone()
+    
+    LOGGER.info(f"{ARRAYSIZE=}")
     rows_saved = 0
-
     database_name = get_database_name(catalog_entry)
 
     with metrics.record_counter(None) as counter:
         counter.tags["database"] = database_name
         counter.tags["table"] = catalog_entry.table
-
-        while row:
+        
+        for row in ResultIterator(results, ARRAYSIZE):
+            
             counter.increment()
             rows_saved += 1
             record_message = row_to_singer_record(
@@ -269,9 +275,8 @@ def sync_query(
                         "replication_key_value",
                         record_message.record[replication_key],
                     )
+
             if rows_saved % 1000 == 0:
                 singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
-
-            row = results.fetchone()
 
     singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
