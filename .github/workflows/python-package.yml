@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.7"]
 
     steps:
     - name: Check out the repository
@@ -24,6 +24,7 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-    - name: List files
+    - name: List files and check db2 version
       run: |
         ls -ltr
+        db2 --version
