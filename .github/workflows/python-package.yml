@@ -6,6 +6,8 @@ name: Python package
 on:
   push:
     branches: [ "main", "feature/github_actions" ]
+    paths:
+      - "tap_db2/*"
 
 jobs:
   build:
