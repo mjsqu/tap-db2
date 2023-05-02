@@ -11,6 +11,7 @@ import singer.metrics as metrics
 from singer import metadata
 from singer import utils
 from tap_db2.connection import ResultIterator
+from sqlalchemy import text
 
 ARRAYSIZE = 1
 
@@ -208,10 +209,10 @@ def sync_query(
 
     time_extracted = utils.now()
     if len(params) == 0:
-        results = cursor.execute(select_sql)
+        results = cursor.execute(text(select_sql))
     else:
         LOGGER.info(params["replication_key_value"])
-        results = cursor.execute(select_sql, params["replication_key_value"])
+        results = cursor.execute(text(select_sql), params["replication_key_value"])
     
     LOGGER.info(f"{ARRAYSIZE=}")
     rows_saved = 0

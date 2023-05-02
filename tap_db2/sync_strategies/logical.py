@@ -14,6 +14,7 @@ from tap_db2.connection import (
     revert_ouput_converter,
 )
 import tap_db2.sync_strategies.common as common
+from sqlalchemy import text
 
 LOGGER = singer.get_logger()
 
@@ -68,7 +69,7 @@ class log_based_sync:
         database_is_change_tracking_enabled = False
 
         with self.mssql_conn.connect() as open_conn:
-            results = open_conn.execute(sql_query)
+            results = open_conn.execute(text(sql_query))
             row = results.fetchone()
 
             if row["db_name"] == self.database_name:
@@ -94,7 +95,7 @@ class log_based_sync:
 
         table_is_change_tracking_enabled = False
         with self.mssql_conn.connect() as open_conn:
-            change_tracking_tables = open_conn.execute(sql_query)
+            change_tracking_tables = open_conn.execute(text(sql_query))
 
             enabled_change_tracking_tables = change_tracking_tables.fetchall()
             if schema_table in enabled_change_tracking_tables:
@@ -114,7 +115,7 @@ class log_based_sync:
         object_id = self._get_object_version_by_table_name()
 
         with self.mssql_conn.connect() as open_conn:
-            results = open_conn.execute(sql_query.format(object_id))
+            results = open_conn.execute(text(sql_query.format(object_id)))
             row = results.fetchone()
 
             min_valid_version = row["min_valid_version"]
@@ -131,7 +132,7 @@ class log_based_sync:
         sql_query = "SELECT OBJECT_ID('{}') AS object_id"
         #    (-> (partial format "{}.{}.{}")
         with self.mssql_conn.connect() as open_conn:
-            results = open_conn.execute(sql_query.format(schema_table))
+            results = open_conn.execute(text(sql_query.format(schema_table)))
             row = results.fetchone()
 
             object_id = row["object_id"]
@@ -235,7 +236,7 @@ class log_based_sync:
             if self.catalog_entry.tap_stream_id == "dbo-InputMetadata":
                 prev_converter = modify_ouput_converter(open_conn)
 
-            results = open_conn.execute(ct_sql_query)
+            results = open_conn.execute(text(ct_sql_query))
 
             row = results.fetchone()
             rows_saved = 0
@@ -357,7 +358,7 @@ class log_based_sync:
         and fetches then returns the single result as required.
         """
         with self.mssql_conn.connect() as open_conn:
-            results = open_conn.execute(sql_query)
+            results = open_conn.execute(text(sql_query))
             row = results.fetchone()
 
             single_result = row[column]
