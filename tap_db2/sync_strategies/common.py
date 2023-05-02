@@ -212,7 +212,8 @@ def sync_query(
         results = cursor.execute(text(select_sql))
     else:
         LOGGER.info(params["replication_key_value"])
-        results = cursor.execute(text(select_sql), [params["replication_key_value"]])
+        stmt = text(select_sql).bindparams(replication_key_value=params["replication_key_value"])
+        results = cursor.execute(stmt)
     
     LOGGER.info(f"{ARRAYSIZE=}")
     rows_saved = 0
