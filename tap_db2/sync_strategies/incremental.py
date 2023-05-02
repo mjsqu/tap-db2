@@ -70,7 +70,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns):
               replication_key_metadata
               ].format
             
-            select_sql += f' WHERE "{replication_key_metadata}" >= ? '
+            select_sql += f' WHERE "{replication_key_metadata}" >= :replication_key_value '
 
             # Handle the offset value
             # datetime - use pendulum to alter the value to be passed as a bind parameter
