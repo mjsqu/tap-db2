@@ -31,6 +31,7 @@ from tap_db2.connection import (
     ResultIterator,
 )
 
+from sqlalchemy import text
 from sqlalchemy.exc import ProgrammingError
 
 ARRAYSIZE = 1
@@ -265,7 +266,7 @@ def discover_catalog(db2_conn, config):
     with db2_conn.connect() as open_conn:
         LOGGER.info("Fetching tables")
         # Query for LUW DB2 instances only - SYSCAT may not exist on Z/OS
-        tables_results = open_conn.execute(
+        tables_results = open_conn.execute(text(
             """
             SELECT
                 RTRIM(TABSCHEMA) AS TABLE_SCHEMA,
@@ -280,7 +281,7 @@ def discover_catalog(db2_conn, config):
                 'SYSSTAT',
                 'SYSIBMADM'
             )
-            """
+            """)
         )
         table_info = {}
 
@@ -302,7 +303,7 @@ def discover_catalog(db2_conn, config):
 
         # Query for LUW DB2 instances only - SYSCAT may not exist on Z/OS
         # 1.0.4 - updated to include BASE_TABNAME check for aliases
-        column_results = open_conn.execute(
+        column_results = open_conn.execute(text(
             """
             SELECT
                 RTRIM(t.TABSCHEMA) AS TABLE_SCHEMA,
@@ -323,7 +324,7 @@ def discover_catalog(db2_conn, config):
             AND c.TABSCHEMA = t.TABSCHEMA 
             WHERE t.TABSCHEMA NOT LIKE 'SYS%'
             ORDER BY t.TABSCHEMA,t.TABNAME,c.COLNO;
-            """
+            """)
         )
         columns = []
         LOGGER.info(f"{ARRAYSIZE=}")
@@ -783,16 +784,16 @@ def log_server_params(db2_conn):
                 'FIXPACK_NUM'
                 ]
         try:
-            row = open_conn.execute(
+            row = open_conn.execute(text(
                 """
                    SELECT {} FROM SYSIBMADM.ENV_INST_INFO
-                """.format(','.join(server_parameters))
+                """.format(','.join(server_parameters)))
             )
         except ProgrammingError:
-            row = open_conn.execute(
+            row = open_conn.execute(text(
                 """
                    SELECT {} FROM TABLE (sysproc.env_get_inst_info()) as instanceinfo
-                """.format(','.join(server_parameters))
+                """.format(','.join(server_parameters)))
             )
         except Exception as e:
             LOGGER.warning(
