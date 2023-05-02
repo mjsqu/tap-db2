@@ -60,7 +60,7 @@ def get_db2_sql_engine(config) -> Engine:
 
     # connection_string = "ibm_db_sa+pyodbc://db2inst1:*
     # @localhost:50000/TESTDB"
-    connection_string = "ibm_db_sa+pyodbc://{}:{}@{}:{}/{}".format(
+    connection_string = "ibm_db_sa://{}:{}@{}:{}/{}".format(
         config["username"],
         config["password"],
         config["hostname"],

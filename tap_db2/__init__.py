@@ -301,6 +301,7 @@ def discover_catalog(db2_conn, config):
         LOGGER.info("Tables fetched, fetching columns")
 
         # Query for LUW DB2 instances only - SYSCAT may not exist on Z/OS
+        # 1.0.4 - updated to include BASE_TABNAME check for aliases
         column_results = open_conn.execute(
             """
             SELECT
@@ -318,7 +319,7 @@ def discover_catalog(db2_conn, config):
             SYSCAT.TABLES t
             LEFT JOIN 
             SYSCAT.COLUMNS c
-            ON c.TABNAME = t.TABNAME 
+            ON (c.TABNAME = t.TABNAME or C.TABNAME = t.BASE_TABNAME) 
             AND c.TABSCHEMA = t.TABSCHEMA 
             WHERE t.TABSCHEMA NOT LIKE 'SYS%'
             ORDER BY t.TABSCHEMA,t.TABNAME,c.COLNO;
