@@ -55,3 +55,13 @@ def set_replication_method_and_key(stream, r_method, r_key):
 
     stream.metadata = singer.metadata.to_list(new_md)
     return stream
+
+def select_stream_from_catalog(catalog_file,tap_stream_id):
+    import json
+    with open(catalog_file,'r') as f:
+        catalog = json.load(f)
+    
+    streams = catalog.get('streams')
+    selected_stream = [stream for stream in streams if stream.get('tap_stream_id') == tap_stream_id]
+    new_catalog = {"streams":selected_stream}
+    return json.dumps(new_catalog)
