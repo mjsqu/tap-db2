@@ -530,12 +530,14 @@ def get_non_binlog_streams(db2_conn, catalog, config, state):
             LOGGER.debug(f"{stream.tap_stream_id} does have a state: ordering is 2")
             return 2
 
+    LOGGER.info(f"{[s for s in catalog.streams]}")
+
     # Filter the catalog by those selected and then order by the ordering function
     streams_to_sync = sorted(
         [s for s in catalog.streams if common.stream_is_selected(s)],
         key=lambda s:stream_ordering(s)
         )
-
+    LOGGER.info(f"{streams_to_sync=}")
     # Finally ensure the the streams are in the freshly-discovered catalog
     return resolve_catalog(discovered, streams_to_sync)
 
@@ -820,9 +822,11 @@ def main_impl():
     if args.discover:
         do_discover(db2_conn, args.config)
     elif args.catalog:
+        LOGGER.info("Provided catalog")
         state = args.state or {}
         do_sync(db2_conn, args.config, args.catalog, state)
     elif args.properties:
+        LOGGER.info("Provided properties")
         catalog = Catalog.from_dict(args.properties)
         state = args.state or {}
         do_sync(db2_conn, args.config, catalog, state)
