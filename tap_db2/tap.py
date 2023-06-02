@@ -37,8 +37,8 @@ class Tapdb2(SQLTap):
         ),
         th.Property(
             "port",
-            th.IntegerType,
-            default=50000,
+            th.StringType,
+            default="50000",
             description="The port number",
         ),
         th.Property(
