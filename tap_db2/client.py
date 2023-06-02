@@ -9,7 +9,12 @@ from typing import Any, Iterable
 
 import sqlalchemy  # noqa: TCH002
 from sqlalchemy import bindparam
+
+import singer_sdk._singerlib as singer
 from singer_sdk import SQLConnector, SQLStream
+from singer_sdk.helpers._catalog import pop_deselected_record_properties
+from singer_sdk.helpers._util import utc_now
+
 
 
 class db2Connector(SQLConnector):
@@ -103,6 +108,28 @@ class db2Stream(SQLStream):
     """Stream class for db2 streams."""
 
     connector_class = db2Connector
+    
+    def _generate_record_messages(
+        self,
+        record: dict,
+    ) -> t.Generator[singer.RecordMessage, None, None]:
+        """Write out a RECORD message.
+
+        Args:
+            record: A single stream record.
+
+        Yields:
+            Record message objects.
+        """
+        pop_deselected_record_properties(record, self.schema, self.mask, self.logger)
+        record_message = singer.RecordMessage(
+            stream=self.name,
+            record=record,
+            version=None,
+            time_extracted=utc_now(),
+        )
+
+        yield record_message
 
     def get_records(self, context: dict | None) -> t.Iterable[dict[str, t.Any]]:
         """Return a generator of record-type dictionary objects.
@@ -157,4 +184,4 @@ class db2Stream(SQLStream):
 
         with self.connector._connect() as conn:
             for record in conn.execute(query):
-                yield dict(record._mapping)
+                yield dict(record)
