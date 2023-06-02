@@ -120,16 +120,26 @@ class db2Stream(SQLStream):
 
         Yields:
             Record message objects.
+        
+        Overrides:
+            Removes conform_record_data_types - SQL records should be properly typed
         """
         pop_deselected_record_properties(record, self.schema, self.mask, self.logger)
-        record_message = singer.RecordMessage(
-            stream=self.name,
-            record=record,
-            version=None,
-            time_extracted=utc_now(),
-        )
 
-        yield record_message
+        # Skip conform_record_data_types
+
+        for stream_map in self.stream_maps:
+            mapped_record = stream_map.transform(record)
+            # Emit record if not filtered
+            if mapped_record is not None:
+                record_message = singer.RecordMessage(
+                    stream=stream_map.stream_alias,
+                    record=mapped_record,
+                    version=None,
+                    time_extracted=utc_now(),
+                )
+
+                yield record_message
 
     def get_records(self, context: dict | None) -> t.Iterable[dict[str, t.Any]]:
         """Return a generator of record-type dictionary objects.
