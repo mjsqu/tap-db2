@@ -15,6 +15,33 @@ from singer_sdk import SQLConnector, SQLStream
 class db2Connector(SQLConnector):
     """Connects to the db2 SQL source."""
 
+    def discover_catalog_entries(self) -> list[dict]:
+        """Return a list of catalog entries from discovery.
+
+        Returns:
+            The discovered catalog entries as a list.
+        """
+        result: list[dict] = []
+        engine = self._engine
+        inspected = sqlalchemy.inspect(engine)
+        for schema_name in self.get_schema_names(engine, inspected):
+            # Iterate through each table and view
+            for table_name, is_view in self.get_object_names(
+                engine,
+                inspected,
+                schema_name,
+            ):
+                catalog_entry = self.discover_catalog_entry(
+                    engine,
+                    inspected,
+                    schema_name.strip().upper(),
+                    table_name.strip().upper(),
+                    is_view,
+                )
+                result.append(catalog_entry.to_dict())
+
+        return result
+
     def get_sqlalchemy_url(self, config: dict) -> str:
         """Concatenate a SQLAlchemy URL for use in connecting to the source.
 
