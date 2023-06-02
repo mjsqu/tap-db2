@@ -135,7 +135,7 @@ class db2Stream(SQLStream):
 
     connector_class = db2Connector
     
-    @property
+    @functools.cached_property
     def schema(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec.
 
@@ -145,38 +145,6 @@ class db2Stream(SQLStream):
             The schema object.
         """
         return t.cast(dict, self._singer_catalog_entry.schema.to_dict())
-
-    def _generate_record_messages(
-        self,
-        record: dict,
-    ) -> t.Generator[singer.RecordMessage, None, None]:
-        """Write out a RECORD message.
-
-        Args:
-            record: A single stream record.
-
-        Yields:
-            Record message objects.
-        
-        Overrides:
-            Removes conform_record_data_types - SQL records should be properly typed
-        """
-        pop_deselected_record_properties(record, self.schema, self.mask, self.logger)
-
-        # Skip conform_record_data_types
-
-        for stream_map in self.stream_maps:
-            mapped_record = stream_map.transform(record)
-            # Emit record if not filtered
-            if mapped_record is not None:
-                record_message = singer.RecordMessage(
-                    stream=stream_map.stream_alias,
-                    record=mapped_record,
-                    version=None,
-                    time_extracted=utc_now(),
-                )
-
-                yield record_message
 
     def get_records(self, context: dict | None) -> t.Iterable[dict[str, t.Any]]:
         """Return a generator of record-type dictionary objects.
