@@ -135,7 +135,7 @@ class db2Stream(SQLStream):
 
     connector_class = db2Connector
     
-    @functools.cached_property
+    @property
     def schema(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec.
 
@@ -145,21 +145,6 @@ class db2Stream(SQLStream):
             The schema object.
         """
         return t.cast(dict, self._singer_catalog_entry.schema.to_dict())
-
-    @functools.cache
-    def get_selected_schema(self) -> dict:
-        """Return a copy of the Stream JSON schema, dropping any fields not selected.
-
-        Returns:
-            A dictionary containing a copy of the Stream JSON schema, filtered
-            to any selection criteria.
-        """
-        return catalog.get_selected_schema(
-            stream_name=self.name,
-            schema=self.schema,
-            mask=self.mask,
-            logger=self.logger,
-        )
 
     def _generate_record_messages(
         self,
@@ -246,4 +231,8 @@ class db2Stream(SQLStream):
 
         with self.connector._connect() as conn:
             for record in conn.execute(query):
-                yield dict(record)
+                transformed_record = self.post_process(dict(record._mapping))
+                if transformed_record is None:
+                    # Record filtered out during post_process()
+                    continue
+                yield transformed_record
