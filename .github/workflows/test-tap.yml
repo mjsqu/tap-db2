@@ -53,6 +53,8 @@ jobs:
           DB2INSTANCE: db2inst1
           DB2INST1_PASSWORD: password
           DBNAME: testdb
+          ARCHIVE_LOGS: false
+          AUTOCONFIG: false
         options: >-
           --privileged=true
         ports:
