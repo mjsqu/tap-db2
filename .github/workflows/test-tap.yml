@@ -1,4 +1,4 @@
-name: DB2 Image
+name: Test Tap
 
 on:
  workflow_dispatch:
