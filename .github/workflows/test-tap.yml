@@ -1,11 +1,10 @@
 name: Test Tap
 
 on:
- workflow_dispatch:
-
+ push:
 
 jobs:
-  build:
+  test:
   
     runs-on: ubuntu-latest
     steps:
