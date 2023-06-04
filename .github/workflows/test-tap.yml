@@ -17,6 +17,12 @@ jobs:
       run: >-
         docker exec ${{ job.services.ibm_db2.id }} 
         su - db2inst1 -c 'db2 get connection state'
+
+    - name: Create sample database
+      run: >- 
+        docker exec ${{ job.services.ibm_db2.id }}
+        su - db2inst1 -c 'db2sampl -sql'
+
     - name: Checkout code
       uses: actions/checkout@v3
 
