@@ -1,13 +1,7 @@
 name: Test Tap
 
 on:
-  pull_request:
-    paths-ignore:
-      - '**/README.md'
   push:
-    branches: [main]
-    paths-ignore:
-      - '**/README.md'
 
 jobs:
   test:
@@ -22,8 +16,8 @@ jobs:
           # Licence Agreement
           # https://www.ibm.com/terms/?id=L-KHAI-CAUM7H
           LICENSE: accept
-          DB2INSTANCE: db2inst1
-          DB2INST1_PASSWORD: password
+          DB2INSTANCE: ${{ secrets.TAP_DB2_USERNAME }} 
+          DB2INST1_PASSWORD: ${{ secrets.TAP_DB2_PASSWORD }}
           DBNAME: testdb
           # Speed up setup
           ARCHIVE_LOGS: false
@@ -61,5 +55,12 @@ jobs:
       run: |
         poetry install
     - name: Run Tap
+      env:
+        TAP_DB2_USERNAME: ${{ secrets.TAP_DB2_USERNAME }}
+        TAP_DB2_PASSWORD: ${{ secrets.TAP_DB2_PASSWORD }}
+        TAP_DB2_HOSTNAME: localhost
+        TAP_DB2_PORT: 50000
+        TAP_DB2_DATABASE: sample
       run: |
-        poetry run tap-db2 --config tests/db2_config.json --discover
+        poetry self add poetry-dotenv-plugin
+        poetry run pytest
