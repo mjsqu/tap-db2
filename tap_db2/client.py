@@ -16,7 +16,6 @@ from singer_sdk.helpers._catalog import pop_deselected_record_properties
 import singer_sdk.helpers._catalog as catalog
 from singer_sdk.helpers._util import utc_now
 import typing as t
-import functools
 
 class db2Connector(SQLConnector):
     """Connects to the db2 SQL source."""
@@ -104,38 +103,13 @@ class db2Connector(SQLConnector):
         # You may delete this method if overrides are not needed.
         return SQLConnector.to_sql_type(jsonschema_type)
 
-class CachedAttribute(object):    
-    '''Computes attribute value and caches it in the instance.
-    From the Python Cookbook (Denis Otkidach)
-    This decorator allows you to create a property which can be computed once and
-    accessed many times. Sort of like memoization.
-    '''
-    def __init__(self, method, name=None):
-        # record the unbound-method and the name
-        self.method = method
-        self.name = name or method.__name__
-        self.__doc__ = method.__doc__
-    def __get__(self, inst, cls):
-        # self: <__main__.cache object at 0xb781340c>
-        # inst: <__main__.Foo object at 0xb781348c>
-        # cls: <class '__main__.Foo'>       
-        if inst is None:
-            # instance attribute accessed on class, return self
-            # You get here if you write `Foo.bar`
-            return self
-        # compute, cache and return the instance's attribute value
-        result = self.method(inst)
-        # setattr redefines the instance's attribute so this doesn't get called again
-        setattr(inst, self.name, result)
-        return result
-
-
 class db2Stream(SQLStream):
     """Stream class for db2 streams."""
 
     connector_class = db2Connector
+    _cached_schema: dict | None = None
     
-    @functools.cached_property
+    @property
     def schema(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec.
 
@@ -144,7 +118,13 @@ class db2Stream(SQLStream):
         Returns:
             The schema object.
         """
-        return t.cast(dict, self._singer_catalog_entry.schema.to_dict())
+        if not self._cached_schema:
+            self._cached_schema = t.cast(
+                dict,
+                self._singer_catalog_entry.schema.to_dict(),
+            )
+
+        return self._cached_schema
 
     def _generate_record_messages(
         self,
