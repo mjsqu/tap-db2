@@ -24,8 +24,8 @@ jobs:
           # Licence Agreement
           # https://www.ibm.com/terms/?id=L-KHAI-CAUM7H
           LICENSE: accept
-          DB2INSTANCE: ${{ secrets.TAP_DB2_USERNAME }} 
-          DB2INST1_PASSWORD: ${{ secrets.TAP_DB2_PASSWORD }}
+          DB2INSTANCE: db2inst1 
+          DB2INST1_PASSWORD: password
           DBNAME: testdb
           # Speed up setup
           ARCHIVE_LOGS: false
@@ -64,8 +64,8 @@ jobs:
         poetry install
     - name: Run Tap
       env:
-        TAP_DB2_USERNAME: ${{ secrets.TAP_DB2_USERNAME }}
-        TAP_DB2_PASSWORD: ${{ secrets.TAP_DB2_PASSWORD }}
+        TAP_DB2_USERNAME: db2inst1
+        TAP_DB2_PASSWORD: password
         TAP_DB2_HOSTNAME: localhost
         TAP_DB2_PORT: 50000
         TAP_DB2_DATABASE: sample
