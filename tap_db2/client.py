@@ -40,8 +40,8 @@ class db2Connector(SQLConnector):
                 catalog_entry = self.discover_catalog_entry(
                     engine,
                     inspected,
-                    schema_name.strip(),
-                    table_name.strip(),
+                    schema_name.rstrip(),
+                    table_name.rstrip(),
                     is_view,
                 )
                 result.append(catalog_entry.to_dict())
