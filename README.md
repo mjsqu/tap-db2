@@ -4,17 +4,7 @@
 
 Built with the [Meltano Tap SDK](https://sdk.meltano.com) for Singer Taps.
 
-<!--
-
-Developer TODO: Update the below as needed to correctly describe the install procedure. For instance, if you do not have a PyPi repo, or if you want users to directly install from your git repo, you can modify this step as appropriate.
-
 ## Installation
-
-Install from PyPi:
-
-```bash
-pipx install tap-db2
-```
 
 Install from GitHub:
 
@@ -22,21 +12,28 @@ Install from GitHub:
 pipx install git+https://github.com/ORG_NAME/tap-db2.git@main
 ```
 
--->
+## Capabilities
 
-## Configuration
+* `catalog`
+* `state`
+* `discover`
+* `about`
+* `stream-maps`
+* `schema-flattening`
 
-### Accepted Config Options
+## Settings
 
-<!--
-Developer TODO: Provide a list of config options accepted by the tap.
+| Setting             | Required | Default | Description |
+|:--------------------|:--------:|:-------:|:------------|
+| hostname            | True     | None    | The hostname or IP address |
+| password            | True     | None    | Password    |
+| username            | True     | None    | Username to connect with |
+| port                | False    | 50000   | The port number |
+| database            | False    | sample  | The name of the database on the host |
+| stream_maps         | False    | None    | Config object for stream maps capability. For more information check out [Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html). |
+| stream_map_config   | False    | None    | User-defined config values to be used within map expressions. |
 
-This section can be created by copy-pasting the CLI output from:
-
-```
-tap-db2 --about --format=markdown
-```
--->
+A full list of supported settings and capabilities is available by running: `tap-db2 --about`
 
 A full list of supported settings and capabilities for this
 tap is available by running:
@@ -53,9 +50,7 @@ environment variable is set either in the terminal context or in the `.env` file
 
 ### Source Authentication and Authorization
 
-<!--
-Developer TODO: If your tap requires special access on the source system, or any special authentication requirements, provide those here.
--->
+tap-db2 requires a user account with sufficient access to query DB2 metadata tables such as `SYSCAT.TABLES` and `SELECT` access to tables that need to be synced.
 
 ## Usage
 
@@ -99,12 +94,6 @@ poetry run tap-db2 --help
 
 _**Note:** This tap will work in any Singer environment and does not require Meltano.
 Examples here are for convenience and to streamline end-to-end orchestration scenarios._
-
-<!--
-Developer TODO:
-Your project comes with a custom `meltano.yml` project file already created. Open the `meltano.yml` and follow any "TODO" items listed in
-the file.
--->
 
 Next, install Meltano (if you haven't already) and any needed plugins:
 
