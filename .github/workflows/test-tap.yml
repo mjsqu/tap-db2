@@ -2,6 +2,14 @@ name: Test Tap
 
 on:
   push:
+  workflow_call:
+    secrets:
+      TAP_DB2_USERNAME:
+        description: 'The DB2 Database Username'
+        required: true
+      TAP_DB2_PASSWORD:
+        description: 'The DB2 Database Password'
+        required: true
 
 jobs:
   test:
