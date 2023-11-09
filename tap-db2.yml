@@ -1,0 +1,23 @@
+# A meltano plugin definition YAML file
+# https://docs.meltano.com/concepts/project#custom-plugin-definitions
+name: tap-db2
+namespace: tap_db2
+pip_url: ..
+variant: mjsqu
+executable: tap-db2
+capabilities:
+    - catalog
+    - discover
+    - properties
+    - state
+settings:
+    - name: hostname
+      kind: string
+    - name: port
+      kind: integer
+    - name: username
+      kind: string
+    - name: password
+      kind: password
+    - name: database
+      kind: string
