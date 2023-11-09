@@ -23,3 +23,6 @@ requires = ["setuptools", "wheel", "setuptools_scm[toml]>=6.2"]
 tap-db2 = "tap_db2:main"
 
 [tool.setuptools_scm]
+
+[tool.setuptools]
+packages = ["tap_db2"]
