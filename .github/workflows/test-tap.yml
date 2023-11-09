@@ -54,7 +54,6 @@ jobs:
         meltano add extractor tap-db2 --from-ref ../tap-db2.yml || cat ${{ github.workspace }}/testproj/.meltano/logs/pip/extractors/tap-db2/pip.log
         meltano invoke tap-db2 --discover
       env:
-      env:
         TAP_DB2_USERNAME: db2inst1
         TAP_DB2_PASSWORD: password
         TAP_DB2_HOSTNAME: localhost
