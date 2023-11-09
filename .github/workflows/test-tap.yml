@@ -8,7 +8,37 @@ jobs:
     # Set up DB2 image
     # Installing the Db2 Community Edition Docker image on Linux systems
     # https://www.ibm.com/docs/en/db2/11.5?topic=system-linux
+    services:
+      ibm_db2:
+        image: "icr.io/db2_community/db2"
+        env:
+          # Licence Agreement
+          # https://www.ibm.com/terms/?id=L-KHAI-CAUM7H
+          LICENSE: accept
+          DB2INSTANCE: db2inst1 
+          DB2INST1_PASSWORD: password
+          DBNAME: testdb
+          # Speed up setup
+          ARCHIVE_LOGS: false
+          AUTOCONFIG: false
+        options: >-
+          --privileged=true
+        ports:
+          - 50000:50000
+
     steps:
+    - name: "Perform healthcheck from the outside"
+      run: >- 
+        docker logs -f ${{ job.services.ibm_db2.id }} | 
+        sed '/(*) Setup has completed./ q'
+    - name: Get DB2 Database State
+      run: >-
+        docker exec ${{ job.services.ibm_db2.id }} 
+        su - db2inst1 -c 'db2 get connection state'
+    - name: Create sample database
+      run: >- 
+        docker exec ${{ job.services.ibm_db2.id }}
+        su - db2inst1 -c 'db2sampl -sql'
     - name: Checkout code
       uses: actions/checkout@v3
     - name: Set up Python
@@ -22,6 +52,9 @@ jobs:
         meltano init testproj
         cd testproj
         meltano add extractor tap-db2 --from-ref ../tap-db2.yml || cat ${{ github.workspace }}/testproj/.meltano/logs/pip/extractors/tap-db2/pip.log
+    - name: Run meltano invoke
+      run: |
+        cd testproj  
         meltano invoke tap-db2 --discover
       env:
         TAP_DB2_USERNAME: db2inst1
