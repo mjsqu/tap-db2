@@ -6,7 +6,7 @@ dependencies = [
         "ibm-db==3.2.0",
         "jinja2==3.1.2",
         "markupsafe<2.2.0",
-        "pendulum==2.1.2",
+        "pendulum==3.0.0",
         "pyodbc==5.0.1",
         "pytz>=2018.1",
         "singer-python>=5.12.0",
