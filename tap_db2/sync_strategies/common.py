@@ -6,6 +6,7 @@ import datetime
 import singer
 import time
 import uuid
+import base64
 
 import singer.metrics as metrics
 from singer import metadata
@@ -151,8 +152,8 @@ def row_to_singer_record(
                 # Ensure it is converted to bytes so .hex() is available
                 byte_val = elem.tobytes() if isinstance(elem, memoryview) else elem
                 try:
-                    # This makes it "readable" text again
-                    row_to_persist += (byte_val.decode("utf-8"),)
+                    # Convert to Base64 encoded string
+                    row_to_persist += (base64.b64encode(byte_val),)
                 except UnicodeDecodeError:
                     # Fallback to Hex or Base64 if it's actually binary data
                     row_to_persist += (f"0x{byte_val.hex().upper()}",)
