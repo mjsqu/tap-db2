@@ -68,7 +68,7 @@ if 'LOGGING_CONF_FILE' in os.environ and os.environ['LOGGING_CONF_FILE']:
 
 # Full list
 #BIGINT - i
-#BLOB - ignore for now
+#BLOB - binary
 #CHARACTER - s
 #CLOB - ignore for now
 #DATE - d
@@ -79,6 +79,12 @@ if 'LOGGING_CONF_FILE' in os.environ and os.environ['LOGGING_CONF_FILE']:
 #TIMESTAMP - d
 #VARCHAR - s
 #XML - s
+
+BINARY_TYPES = set(
+    [
+        "blob",
+    ]
+)
 
 STRING_TYPES = set(
     [
@@ -228,6 +234,10 @@ def schema_for_column(c,config):
             result.format = "time"
         else:
             result.format = "date-time"
+
+    elif data_type in BINARY_TYPES:
+        result.type = ["null", "string"]
+        result.maxLength = c.character_maximum_length
             
     else:
         result = Schema(
